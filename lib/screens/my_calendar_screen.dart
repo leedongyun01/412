@@ -36,13 +36,14 @@ class _MyCalendarScreenState extends State<MyCalendarScreen> {
   List<String> _getEventsForDay(DateTime day) {
     return _events
         .where((event) =>
-            isSameDay(DateTime.parse(event['startDate']), day) ||
-            isSameDay(DateTime.parse(event['endDate']), day))
+    isSameDay(DateTime.parse(event['startDate']), day) ||
+        isSameDay(DateTime.parse(event['endDate']), day))
         .map((e) => e['content'] as String)
         .toList();
   }
 
-  void _addEvent(DateTime day, String eventContent) {
+  // 일정 추가 버튼 클릭 시 화면 이동
+  void _addEvent(DateTime day, String eventContent) async {
     final newEvent = {
       'schedule_id': DateTime.now().toIso8601String(),
       'startDate': day.toIso8601String(),
@@ -52,7 +53,7 @@ class _MyCalendarScreenState extends State<MyCalendarScreen> {
     setState(() {
       _events.add(newEvent);
     });
-    _saveSchedules();
+    await _saveSchedules();
   }
 
   @override
@@ -97,33 +98,40 @@ class _MyCalendarScreenState extends State<MyCalendarScreen> {
           Expanded(
             child: _selectedDay == null || _getEventsForDay(_selectedDay!).isEmpty
                 ? const Center(
-                    child: Text('선택한 날짜에 일정이 없습니다.'),
-                  )
+              child: Text('선택한 날짜에 일정이 없습니다.'),
+            )
                 : ListView(
-                    children: _getEventsForDay(_selectedDay!).map((event) {
-                      final eventData = _events.firstWhere((e) =>
-                          e['content'] == event &&
-                          isSameDay(DateTime.parse(e['startDate']), _selectedDay!));
-                      return ListTile(
-                        title: Text(event),
-                        onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (context) => _buildBottomSheet(eventData),
-                          );
-                        },
-                      );
-                    }).toList(),
-                  ),
+              children: _getEventsForDay(_selectedDay!).map((event) {
+                final eventData = _events.firstWhere((e) =>
+                e['content'] == event &&
+                    isSameDay(DateTime.parse(e['startDate']), _selectedDay!));
+                return ListTile(
+                  title: Text(event),
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => _buildBottomSheet(eventData),
+                    );
+                  },
+                );
+              }).toList(),
+            ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final newSchedule = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddScheduleScreen()),
           );
+
+          if (newSchedule != null) {
+            setState(() {
+              _events.add(newSchedule);
+            });
+            await _saveSchedules();
+          }
         },
         child: const Icon(Icons.add),
       ),
@@ -152,31 +160,27 @@ class _MyCalendarScreenState extends State<MyCalendarScreen> {
             );
             if (editedEvent != null) {
               setState(() {
-                int index = _events.indexOf(event);
+                final index = _events.indexOf(event);
                 _events[index] = editedEvent;
               });
-              _saveSchedules(); 
+              await _saveSchedules();
             }
           },
         ),
         ListTile(
           title: const Text('일정 삭제'),
           onTap: () {
-            Navigator.pop(context); 
             setState(() {
               _events.remove(event);
             });
             _saveSchedules();
+            Navigator.pop(context);
           },
         ),
       ],
     );
   }
-
-  bool isSameDay(DateTime? day1, DateTime? day2) {
-    if (day1 == null || day2 == null) {
-      return false;
-    }
-    return day1.year == day2.year && day1.month == day2.month && day1.day == day2.day;
-  }
 }
+
+
+
