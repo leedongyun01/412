@@ -35,24 +35,39 @@ class _MyCalendarScreenState extends State<MyCalendarScreen> {
 
   List<String> _getEventsForDay(DateTime day) {
     return _events
-        .where((event) =>
-    isSameDay(DateTime.parse(event['startDate']), day) ||
-        isSameDay(DateTime.parse(event['endDate']), day))
+        .where((event) {
+      DateTime startDate = DateTime.parse(event['startDate']);
+      DateTime endDate = DateTime.parse(event['endDate']);
+      // startDate와 endDate 사이의 날짜를 포함하는지 확인
+      return day.isAfter(startDate.subtract(Duration(days: 1))) &&
+          day.isBefore(endDate.add(Duration(days: 1)));
+    })
         .map((e) => e['content'] as String)
         .toList();
   }
 
   // 일정 추가 버튼 클릭 시 화면 이동
-  void _addEvent(DateTime day, String eventContent) async {
-    final newEvent = {
-      'schedule_id': DateTime.now().toIso8601String(),
-      'startDate': day.toIso8601String(),
-      'endDate': day.toIso8601String(),
-      'content': eventContent,
-    };
-    setState(() {
-      _events.add(newEvent);
-    });
+  void _addEvent(DateTime startDate, DateTime endDate, String eventContent) async {
+    List<DateTime> eventDates = [];
+    DateTime currentDate = startDate;
+
+    while (currentDate.isBefore(endDate) || isSameDay(currentDate, endDate)) {
+      eventDates.add(currentDate);
+      currentDate = currentDate.add(Duration(days: 1));
+    }
+
+    for (var date in eventDates) {
+      final newEvent = {
+        'schedule_id': DateTime.now().toIso8601String(),
+        'startDate': date.toIso8601String(),
+        'endDate': date.toIso8601String(),
+        'content': eventContent,
+      };
+
+      setState(() {
+        _events.add(newEvent);
+      });
+    }
     await _saveSchedules();
   }
 
@@ -104,7 +119,11 @@ class _MyCalendarScreenState extends State<MyCalendarScreen> {
               children: _getEventsForDay(_selectedDay!).map((event) {
                 final eventData = _events.firstWhere((e) =>
                 e['content'] == event &&
-                    isSameDay(DateTime.parse(e['startDate']), _selectedDay!));
+                    isSameDay(DateTime.parse(e['startDate']), _selectedDay!),
+                    orElse: () => {}); // orElse를 추가하여 예외를 방지
+                if (eventData.isEmpty) {
+                  return const SizedBox(); // 예외 상황에서 빈 위젯 반환
+                }
                 return ListTile(
                   title: Text(event),
                   onTap: () {
@@ -116,7 +135,7 @@ class _MyCalendarScreenState extends State<MyCalendarScreen> {
                 );
               }).toList(),
             ),
-          ),
+          )
         ],
       ),
       floatingActionButton: FloatingActionButton(
