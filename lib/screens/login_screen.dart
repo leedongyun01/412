@@ -1,10 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'signup_screen.dart';
 import 'find_account_screen.dart';
 import 'main_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _nicknameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+  String _errorMessage = '';
+
+  Future<void> _handleLogin() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    final String nickname = _nicknameController.text.trim();
+    final String password = _passwordController.text.trim();
+
+    try {
+      final response = await http.post(
+        // ___________________________________________________
+        Uri.parse('http://~~~'),
+        // ___________________________________________________
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'userNickname': nickname,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
+      } else {
+        setState(() {
+          _errorMessage = '로그인 실패. 닉네임/비밀번호 확인';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = '오류 발생';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,20 +72,26 @@ class LoginScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
+              controller: _nicknameController,
               decoration: const InputDecoration(labelText: '닉네임'),
             ),
+            const SizedBox(height: 16.0),
             TextField(
+              controller: _passwordController,
               obscureText: true,
               decoration: const InputDecoration(labelText: '비밀번호'),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MainScreen()),
-                );
-              },
+            if (_errorMessage.isNotEmpty)
+              Text(
+                _errorMessage,
+                style: const TextStyle(color: Colors.red),
+              ),
+            const SizedBox(height: 20),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+              onPressed: _handleLogin,
               child: const Text('로그인'),
             ),
             TextButton(
