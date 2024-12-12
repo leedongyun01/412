@@ -33,17 +33,14 @@ class _MyCalendarScreenState extends State<MyCalendarScreen> {
     await _storageService.saveSchedules(_events);
   }
 
-  List<String> _getEventsForDay(DateTime day) {
-    return _events
-        .where((event) {
+  List<Map<String, dynamic>> _getEventsForDay(DateTime day) {
+    return _events.where((event) {
       DateTime startDate = DateTime.parse(event['startDate']);
       DateTime endDate = DateTime.parse(event['endDate']);
-      // startDate와 endDate 사이의 날짜를 포함하는지 확인
+      // 선택된 날짜가 시작일과 종료일 사이에 있는 이벤트만 필터링
       return day.isAfter(startDate.subtract(Duration(days: 1))) &&
           day.isBefore(endDate.add(Duration(days: 1)));
-    })
-        .map((e) => e['content'] as String)
-        .toList();
+    }).toList();
   }
 
   // 일정 추가 버튼 클릭 시 화면 이동
@@ -116,16 +113,9 @@ class _MyCalendarScreenState extends State<MyCalendarScreen> {
               child: Text('선택한 날짜에 일정이 없습니다.'),
             )
                 : ListView(
-              children: _getEventsForDay(_selectedDay!).map((event) {
-                final eventData = _events.firstWhere((e) =>
-                e['content'] == event &&
-                    isSameDay(DateTime.parse(e['startDate']), _selectedDay!),
-                    orElse: () => {}); // orElse를 추가하여 예외를 방지
-                if (eventData.isEmpty) {
-                  return const SizedBox(); // 예외 상황에서 빈 위젯 반환
-                }
+              children: _getEventsForDay(_selectedDay!).map((eventData) {
                 return ListTile(
-                  title: Text(event),
+                  title: Text(eventData['content']),
                   onTap: () {
                     showModalBottomSheet(
                       context: context,
