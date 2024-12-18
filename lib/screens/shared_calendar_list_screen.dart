@@ -25,7 +25,7 @@ class _SharedCalendarListScreenState extends State<SharedCalendarListScreen> {
   Future<void> _loadSharedCalendars() async {
     final userId = LoginData.userId;
     final response = await http.get(
-      Uri.parse('http://121.174.224.9:61314/user/$userId/cal-list'),
+      Uri.parse('http://---/user/$userId/cal-list'),
       headers: {'Content-Type': 'application/json'},
     );
 
