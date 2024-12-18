@@ -53,7 +53,7 @@ class _SharedCalendarScreenState extends State<SharedCalendarScreen> {
 
   /// 로컬 JSON 파일에서 일정 데이터 읽기
   Future<void> syncCalendar() async {
-    final url = Uri.parse('http://121.174.224.9:61314/event/sync');
+    final url = Uri.parse('http://---/event/sync');
 
     try {
       // 로컬에서 일정 데이터 읽기
