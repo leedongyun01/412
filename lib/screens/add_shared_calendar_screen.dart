@@ -50,7 +50,7 @@ class _AddSharedCalendarScreenState extends State<AddSharedCalendarScreen> {
     if (_formKey.currentState!.validate()) {
       try {
         final calendarResponse = await http.post(
-          Uri.parse('http://121.174.224.9:61314/calender/create'),
+          Uri.parse('http://'),
           headers: {'Content-Type': 'application/json'},
           body: json.encode({
             'adminUserId': LoginData.userId,
