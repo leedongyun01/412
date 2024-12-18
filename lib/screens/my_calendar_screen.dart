@@ -28,6 +28,7 @@ class _MyCalendarScreenState extends State<MyCalendarScreen> {
     setState(() {
       _events = fetchedEvents;
     });
+    print(fetchedEvents);
   }
 
   Future<void> _saveSchedules() async {
@@ -41,30 +42,6 @@ class _MyCalendarScreenState extends State<MyCalendarScreen> {
       return day.isAfter(startDate.subtract(Duration(days: 1))) &&
           day.isBefore(endDate.add(Duration(days: 1)));
     }).toList();
-  }
-
-  void _addEvent(DateTime startDate, DateTime endDate, String eventContent) async {
-    List<DateTime> eventDates = [];
-    DateTime currentDate = startDate;
-
-    while (currentDate.isBefore(endDate) || isSameDay(currentDate, endDate)) {
-      eventDates.add(currentDate);
-      currentDate = currentDate.add(Duration(days: 1));
-    }
-
-    for (var date in eventDates) {
-      final newEvent = {
-        'schedule_id': DateTime.now().toIso8601String(),
-        'startDate': date.toIso8601String(),
-        'endDate': date.toIso8601String(),
-        'content': eventContent,
-      };
-
-      setState(() {
-        _events.add(newEvent);
-      });
-    }
-    await _saveSchedules();
   }
 
   @override
@@ -164,9 +141,9 @@ class _MyCalendarScreenState extends State<MyCalendarScreen> {
               MaterialPageRoute(
                 builder: (context) => AddScheduleScreen(
                   initialData: {
+                    'content': event['content'],
                     'startDate': event['startDate'],
                     'endDate': event['endDate'],
-                    'content': event['content'],
                   },
                 ),
               ),

@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'signup_screen.dart';
 import 'find_account_screen.dart';
 import 'main_screen.dart';
-import 'package:calendar/services/login_data.dart';
+import 'package:calendar/models/login_data.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://---/user/login'),
+        Uri.parse('http://121.174.224.9:61314/user/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'userNickname': nickname,

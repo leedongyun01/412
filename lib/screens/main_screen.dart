@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'my_calendar_screen.dart';
 import 'shared_calendar_list_screen.dart';
 import 'add_shared_calendar_screen.dart';
-import 'package:calendar/services/login_data.dart';
+import 'package:calendar/models/login_data.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({Key? key}) : super(key: key);
